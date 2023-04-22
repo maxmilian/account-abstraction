@@ -136,12 +136,12 @@ contract SimpleAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, In
     }
 
     // expire after voting: 30m
-    uint256 private constant RECOVERY_EXPIRE = 1800;
+    uint private constant RECOVERY_EXPIRE = 30 minutes;
     // Current owner can revoke the voting decision when new owner don't take ownership from old owner
     // New owner cannot take ownership during ONBOARD_PERIOD
-    uint256 private constant ONBOARD_PERIOD = 1800;
+    uint private constant ONBOARD_PERIOD = 3 minutes;
 
-    uint private recoveryOnboardAfter = 0;
+    uint public recoveryOnboardAfter = 0;
     address public recoveryOnboardOwner = address(0);
 
     address[] private guardians;
@@ -282,9 +282,13 @@ contract SimpleAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, In
         return _isGuardian(_guardian) && (block.timestamp - votingTimes[_guardian] > RECOVERY_EXPIRE);
     }
 
-    function revokeVoting() public onlyOwner {
+    function _resetVoting() internal {
         recoveryOnboardOwner = address(0);
         recoveryOnboardAfter = 0;
+    }
+
+    function revokeVoting() public onlyOwner {
+        _resetVoting();
     }
 
     function takeOwnershipt() public {
@@ -294,6 +298,7 @@ contract SimpleAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, In
 
         address oldOwner = owner;
         owner = recoveryOnboardOwner;
+        _resetVoting();
         emit OwnershipTransferred(oldOwner, owner);
     }
 }
