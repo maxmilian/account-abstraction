@@ -291,7 +291,7 @@ contract SimpleAccount is BaseAccount, TokenCallbackHandler, UUPSUpgradeable, In
         _resetVoting();
     }
 
-    function takeOwnershipt() public {
+    function takeOwnership() public {
         require(recoveryOnboardOwner != address(0), "no new owner");
         require(msg.sender == recoveryOnboardOwner, "only new owner can take ownershipt");
         require(block.timestamp > recoveryOnboardAfter , "new owner should take ownership after recoveryOnboardAfter");
